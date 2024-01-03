@@ -120,4 +120,19 @@ class MoviesInfoControllerTest {
                     assertThat(response.getName(), equalTo("New Title"));
                 });
     }
+
+    @Test
+    void deleteMovieInfo() {
+        when(moviesInfoServiceMock.deleteMovieInfo(ArgumentMatchers.isA(String.class)))
+                .thenReturn(Mono.empty().ofType(Void.class));
+
+        client
+                .delete()
+                .uri("/v1/movieinfos/{id}", "some-id")
+                .exchange()
+                .expectStatus()
+                .isNoContent()
+                .expectBody(Void.class);
+
+    }
 }
