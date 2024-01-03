@@ -5,6 +5,7 @@ import com.hendisantika.moviesinfoservice.service.MoviesInfoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -63,5 +64,10 @@ public class MoviesInfoController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public Mono<Void> deleteMovieInfo(@PathVariable String id) {
         return moviesInfoService.deleteMovieInfo(id);
+    }
+
+    @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<MovieInfo> getMovieInfoStream() {
+        return moviesInfoSink.asFlux();
     }
 }
