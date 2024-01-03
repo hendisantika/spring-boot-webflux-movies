@@ -124,4 +124,15 @@ class MoviesInfoControllerIT {
                 .isNoContent()
                 .expectBody(Void.class);
     }
+
+    @Test
+    void updateMovieInfo_notFound() {
+        var updateInfo = new MovieInfo(null, "new movie", 2022, List.of("actor"), LocalDate.parse("2022-01-12"));
+        client.put()
+                .uri("/v1/movieinfos/{id}", "non-existing-id")
+                .bodyValue(updateInfo)
+                .exchange()
+                .expectStatus()
+                .isNotFound();
+    }
 }
