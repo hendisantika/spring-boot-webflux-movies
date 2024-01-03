@@ -2,9 +2,11 @@ package com.hendisantika.moviesinfoservice.controller;
 
 import com.hendisantika.moviesinfoservice.entity.MovieInfo;
 import com.hendisantika.moviesinfoservice.service.MoviesInfoService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 
 /**
@@ -24,4 +26,11 @@ public class MoviesInfoController {
 
     private final MoviesInfoService moviesInfoService;
     private final Sinks.Many<MovieInfo> moviesInfoSink = Sinks.many().replay().latest();
+
+    @PostMapping("")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Mono<MovieInfo> addMovieInfo(@RequestBody @Valid MovieInfo movieInfo) {
+        return moviesInfoService.addMovieInfo(movieInfo)
+                .doOnNext(savedInfo -> moviesInfoSink.tryEmitNext(savedInfo));
+    }
 }
