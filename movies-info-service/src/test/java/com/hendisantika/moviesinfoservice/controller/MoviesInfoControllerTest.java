@@ -3,6 +3,7 @@ package com.hendisantika.moviesinfoservice.controller;
 import com.hendisantika.moviesinfoservice.entity.MovieInfo;
 import com.hendisantika.moviesinfoservice.service.MoviesInfoService;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
@@ -14,8 +15,9 @@ import reactor.core.publisher.Mono;
 import java.time.LocalDate;
 import java.util.List;
 
+import static org.assertj.core.api.AssertionsForClassTypes.not;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.when;
 
 /**
@@ -73,6 +75,27 @@ class MoviesInfoControllerTest {
                     var response = movieInfoEntityExchangeResult.getResponseBody();
                     assertThat(response.getId(), equalTo("specific-id"));
                     assertThat(response.getName(), equalTo("Dark Knight Rises"));
+                });
+    }
+
+    @Test
+    void addMovieInfo() {
+        var movieInfo = new MovieInfo(null, "Dark Knight Rises", 2012, List.of("Christian Bale"), LocalDate.parse("2012-07-20"));
+        var savedMovieInfo = new MovieInfo("specific-id", "Dark Knight Rises", 2012, List.of("Christian Bale"), LocalDate.parse("2012-07-20"));
+        when(moviesInfoServiceMock.addMovieInfo(ArgumentMatchers.isA(MovieInfo.class)))
+                .thenReturn(Mono.just(savedMovieInfo));
+
+        client
+                .post()
+                .uri("/v1/movieinfos")
+                .bodyValue(movieInfo)
+                .exchange()
+                .expectStatus()
+                .isCreated()
+                .expectBody(MovieInfo.class)
+                .consumeWith(movieInfoEntityExchangeResult -> {
+                    var response = movieInfoEntityExchangeResult.getResponseBody();
+                    assertThat(response.getId(), is(not(nullValue())));
                 });
     }
 }
