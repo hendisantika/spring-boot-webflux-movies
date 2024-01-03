@@ -16,8 +16,7 @@ import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.not;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -94,5 +93,25 @@ class MoviesInfoControllerIT {
                 .isOk()
                 .expectBody()
                 .jsonPath("$.name").isEqualTo("Dark Knight Rises");
+    }
+
+    @Test
+    void updateMovieInfo() {
+        var updateInfo = new MovieInfo(null, "new movie", 2022, List.of("actor"), LocalDate.parse("2022-01-12"));
+        client.put()
+                .uri("/v1/movieinfos/{id}", "specific-id")
+                .bodyValue(updateInfo)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(MovieInfo.class)
+                .consumeWith(movieInfoEntityExchangeResult -> {
+                    var response = movieInfoEntityExchangeResult.getResponseBody();
+                    assertThat(response.getId(), is(not(nullValue())));
+                    assertThat(response.getName(), equalTo("new movie"));
+                    assertThat(response.getYear(), equalTo(2022));
+                    assertThat(response.getCast().size(), equalTo(1));
+                    assertThat(response.getReleaseDate(), equalTo(LocalDate.parse("2022-01-12")));
+                });
     }
 }
