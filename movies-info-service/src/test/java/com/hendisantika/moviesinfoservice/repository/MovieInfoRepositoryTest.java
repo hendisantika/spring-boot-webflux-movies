@@ -13,6 +13,9 @@ import reactor.test.StepVerifier;
 import java.time.LocalDate;
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+
 /**
  * Created by IntelliJ IDEA.
  * Project : spring-boot-webflux-movies
@@ -52,6 +55,17 @@ class MovieInfoRepositoryTests {
         var flux = movieInfoRepository.findAll().log();
         StepVerifier.create(flux)
                 .expectNextCount(3)
+                .verifyComplete();
+    }
+
+    @Test
+    void findById() {
+        var mono = movieInfoRepository.findById("specific-id").log();
+        StepVerifier.create(mono)
+                .assertNext(movieInfo -> {
+                    assertThat("specific-id", equalTo(movieInfo.getId()));
+                    assertThat("Dark Knight Rises", equalTo(movieInfo.getName()));
+                })
                 .verifyComplete();
     }
 }
