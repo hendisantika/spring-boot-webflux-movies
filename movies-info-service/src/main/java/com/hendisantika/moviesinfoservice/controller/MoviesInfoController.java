@@ -51,4 +51,11 @@ public class MoviesInfoController {
                 .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()))
                 .log();
     }
+
+    @PutMapping("/{id}")
+    public Mono<ResponseEntity<MovieInfo>> updateMovieInfo(@RequestBody MovieInfo updatedMovieInfo, @PathVariable String id) {
+        return moviesInfoService.updateMovieInfo(updatedMovieInfo, id)
+                .map(ResponseEntity.ok()::body)
+                .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));
+    }
 }
