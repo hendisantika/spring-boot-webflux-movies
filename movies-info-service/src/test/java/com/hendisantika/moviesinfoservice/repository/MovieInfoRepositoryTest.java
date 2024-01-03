@@ -81,4 +81,15 @@ class MovieInfoRepositoryTests {
                 })
                 .verifyComplete();
     }
+
+    @Test
+    void update() {
+        var movie = movieInfoRepository.findById("specific-id").block();
+        movie.setYear(2021);
+        var mono = movieInfoRepository.save(movie).log();
+        StepVerifier.create(mono)
+                .assertNext(movieInfo -> {
+                    assertThat(2021, equalTo(movieInfo.getYear()));
+                });
+    }
 }
