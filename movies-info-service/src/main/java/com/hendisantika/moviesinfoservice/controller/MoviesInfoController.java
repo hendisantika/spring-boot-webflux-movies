@@ -5,6 +5,7 @@ import com.hendisantika.moviesinfoservice.service.MoviesInfoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -41,5 +42,13 @@ public class MoviesInfoController {
             return moviesInfoService.getMovieInfosByYear(year);
         }
         return moviesInfoService.getAllMovieInfos();
+    }
+
+    @GetMapping("/{id}")
+    public Mono<ResponseEntity<MovieInfo>> getMovieInfoById(@PathVariable String id) {
+        return moviesInfoService.getMovieInfoById(id)
+                .map(ResponseEntity.ok()::body)
+                .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()))
+                .log();
     }
 }
