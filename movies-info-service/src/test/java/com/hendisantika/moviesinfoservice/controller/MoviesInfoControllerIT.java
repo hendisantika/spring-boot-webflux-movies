@@ -114,4 +114,14 @@ class MoviesInfoControllerIT {
                     assertThat(response.getReleaseDate(), equalTo(LocalDate.parse("2022-01-12")));
                 });
     }
+
+    @Test
+    void deleteMovieInfo() {
+        client.delete()
+                .uri("/v1/movieinfos/{id}", "specific-id")
+                .exchange()
+                .expectStatus()
+                .isNoContent()
+                .expectBody(Void.class);
+    }
 }
