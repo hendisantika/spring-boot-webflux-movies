@@ -1,8 +1,10 @@
 package com.hendisantika.moviesinfoservice.service;
 
+import com.hendisantika.moviesinfoservice.entity.MovieInfo;
 import com.hendisantika.moviesinfoservice.repository.MovieInfoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 /**
  * Created by IntelliJ IDEA.
@@ -19,4 +21,8 @@ import org.springframework.stereotype.Service;
 public class MoviesInfoService {
 
     private final MovieInfoRepository movieInfoRepository;
+
+    public Mono<MovieInfo> addMovieInfo(MovieInfo movieInfo) {
+        return repository.save(movieInfo).log();
+    }
 }
