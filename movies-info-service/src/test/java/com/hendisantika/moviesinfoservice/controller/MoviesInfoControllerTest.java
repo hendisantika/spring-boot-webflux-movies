@@ -133,6 +133,25 @@ class MoviesInfoControllerTest {
                 .expectStatus()
                 .isNoContent()
                 .expectBody(Void.class);
+    }
 
+    @Test
+    void addMovieInfo_validation_name() {
+        var movieInfo = new MovieInfo(null, "", 2012, List.of("Christian Bale"), LocalDate.parse("2012-07-20"));
+        when(moviesInfoServiceMock.addMovieInfo(ArgumentMatchers.isA(MovieInfo.class)))
+                .thenCallRealMethod();
+
+        client
+                .post()
+                .uri("/v1/movieinfos")
+                .bodyValue(movieInfo)
+                .exchange()
+                .expectStatus()
+                .isBadRequest()
+                .expectBody(String.class)
+                .consumeWith(stringEntityExchangeResult -> {
+                    var response = stringEntityExchangeResult.getResponseBody();
+                    assertThat(response, equalTo("movieInfo.name must be present"));
+                });
     }
 }
