@@ -109,4 +109,12 @@ class MovieInfoRepositoryTests {
                 .expectNextCount(1)
                 .verifyComplete();
     }
+
+    @Test
+    void findByName() {
+        var mono = movieInfoRepository.findByName("Batman Begins");
+        StepVerifier.create(mono)
+                .expectNextCount(1)
+                .verifyComplete();
+    }
 }
