@@ -31,4 +31,8 @@ public class MoviesInfoService {
         return repository.findAll();
     }
 
+    public Mono<MovieInfo> getMovieInfoById(String id) {
+        return repository.findById(id);
+    }
+
 }
