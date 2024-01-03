@@ -1,11 +1,16 @@
 package com.hendisantika.moviesinfoservice.controller;
 
+import com.hendisantika.moviesinfoservice.entity.MovieInfo;
 import com.hendisantika.moviesinfoservice.repository.MovieInfoRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
+
+import java.time.LocalDate;
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -28,4 +33,14 @@ class MoviesInfoControllerIT {
     @Autowired
     MovieInfoRepository movieInfoRepository;
 
+    @BeforeEach
+    void setup() {
+        var movieInfos = List.of(
+                new MovieInfo(null, "Batman Begins", 2005, List.of("Christian Bale"), LocalDate.parse("2005-06-15")),
+                new MovieInfo(null, "The Dark Knight", 2008, List.of("Christian Bale"), LocalDate.parse("2008-07-18")),
+                new MovieInfo("specific-id", "Dark Knight Rises", 2012, List.of("Christian Bale"), LocalDate.parse("2012-07-20"))
+        );
+        movieInfoRepository.saveAll(movieInfos)
+                .blockLast(); // to make sure data is saved before start of tests
+    }
 }
