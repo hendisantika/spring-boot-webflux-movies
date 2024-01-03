@@ -98,4 +98,26 @@ class MoviesInfoControllerTest {
                     assertThat(response.getId(), is(not(nullValue())));
                 });
     }
+
+    @Test
+    void updateMovieInfo() {
+        var movieInfo = new MovieInfo(null, "New Title", 2012, List.of("Christian Bale"), LocalDate.parse("2012-07-20"));
+        var updatedMovieInfo = new MovieInfo("specific-id", "New Title", 2012, List.of("Christian Bale"), LocalDate.parse("2012-07-20"));
+        when(moviesInfoServiceMock.updateMovieInfo(ArgumentMatchers.isA(MovieInfo.class), ArgumentMatchers.isA(String.class)))
+                .thenReturn(Mono.just(updatedMovieInfo));
+
+        client
+                .put()
+                .uri("/v1/movieinfos/{id}", "specific-id")
+                .bodyValue(movieInfo)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(MovieInfo.class)
+                .consumeWith(movieInfoEntityExchangeResult -> {
+                    var response = movieInfoEntityExchangeResult.getResponseBody();
+                    assertThat(response.getId(), equalTo("specific-id"));
+                    assertThat(response.getName(), equalTo("New Title"));
+                });
+    }
 }
