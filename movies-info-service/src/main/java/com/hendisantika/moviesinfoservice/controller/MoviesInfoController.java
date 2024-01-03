@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 
@@ -32,5 +33,13 @@ public class MoviesInfoController {
     public Mono<MovieInfo> addMovieInfo(@RequestBody @Valid MovieInfo movieInfo) {
         return moviesInfoService.addMovieInfo(movieInfo)
                 .doOnNext(savedInfo -> moviesInfoSink.tryEmitNext(savedInfo));
+    }
+
+    @GetMapping("")
+    public Flux<MovieInfo> getAllMovieInfos(@RequestParam(value = "year", required = false) Integer year) {
+        if (year != null) {
+            return moviesInfoService.getMovieInfosByYear(year);
+        }
+        return moviesInfoService.getAllMovieInfos();
     }
 }
