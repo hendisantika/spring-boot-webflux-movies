@@ -13,8 +13,9 @@ import reactor.test.StepVerifier;
 import java.time.LocalDate;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.not;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -65,6 +66,18 @@ class MovieInfoRepositoryTests {
                 .assertNext(movieInfo -> {
                     assertThat("specific-id", equalTo(movieInfo.getId()));
                     assertThat("Dark Knight Rises", equalTo(movieInfo.getName()));
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void insert() {
+        var movie = new MovieInfo(null, "Movie Title", 2021, List.of("First Last"), LocalDate.parse("2021-01-11"));
+        var mono = movieInfoRepository.save(movie).log();
+        StepVerifier.create(mono)
+                .assertNext(movieInfo -> {
+                    assertThat("Movie Title", equalTo(movieInfo.getName()));
+                    assertThat(movieInfo.getId(), is(not(nullValue())));
                 })
                 .verifyComplete();
     }
