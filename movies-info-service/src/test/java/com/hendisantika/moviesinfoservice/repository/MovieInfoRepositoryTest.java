@@ -29,7 +29,7 @@ import static org.hamcrest.Matchers.*;
  */
 @DataMongoTest
 @ExtendWith(SpringExtension.class)
-class MovieInfoRepositoryTests {
+class MovieInfoRepositoryTest {
 
     @Autowired
     private MovieInfoRepository movieInfoRepository;
