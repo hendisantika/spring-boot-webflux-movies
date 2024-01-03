@@ -135,4 +135,13 @@ class MoviesInfoControllerIT {
                 .expectStatus()
                 .isNotFound();
     }
+
+    @Test
+    void getMovieInfoById_notFound() {
+        client.get()
+                .uri("/v1/movieinfos/{id}", "non-existing-id")
+                .exchange()
+                .expectStatus()
+                .isNotFound();
+    }
 }
