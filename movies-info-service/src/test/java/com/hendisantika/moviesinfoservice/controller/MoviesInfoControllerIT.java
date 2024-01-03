@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.util.UriComponentsBuilder;
+import reactor.test.StepVerifier;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -159,5 +160,38 @@ class MoviesInfoControllerIT {
                 .isOk()
                 .expectBodyList(MovieInfo.class)
                 .hasSize(1);
+    }
+
+    @Test
+    void getMovieInfoStream() {
+        var movie = new MovieInfo(null, "Movie Title", 2021, List.of("First Last"), LocalDate.parse("2021-01-11"));
+        client.post()
+                .uri("/v1/movieinfos")
+                .bodyValue(movie)
+                .exchange()
+                .expectStatus()
+                .isCreated()
+                .expectBody(MovieInfo.class)
+                .consumeWith(movieInfoEntityExchangeResult -> {
+                    var saved = movieInfoEntityExchangeResult.getResponseBody();
+                    assertThat(saved.getId(), is(not(nullValue())));
+                });
+
+
+        var moviesStreamFlux = client
+                .get()
+                .uri("/v1/movieinfos/stream")
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .returnResult(MovieInfo.class)
+                .getResponseBody();
+
+
+        StepVerifier.create(moviesStreamFlux.log())
+                .assertNext(movieInfo -> {
+                    assertThat(movieInfo.getId(), is(not(nullValue())));
+                })
+                .thenCancel();
     }
 }
