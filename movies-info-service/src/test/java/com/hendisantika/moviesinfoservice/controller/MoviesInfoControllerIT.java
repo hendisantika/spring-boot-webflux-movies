@@ -2,6 +2,7 @@ package com.hendisantika.moviesinfoservice.controller;
 
 import com.hendisantika.moviesinfoservice.entity.MovieInfo;
 import com.hendisantika.moviesinfoservice.repository.MovieInfoRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
@@ -42,5 +43,11 @@ class MoviesInfoControllerIT {
         );
         movieInfoRepository.saveAll(movieInfos)
                 .blockLast(); // to make sure data is saved before start of tests
+    }
+
+    @AfterEach
+    void tearDown() {
+        movieInfoRepository.deleteAll()
+                .block();
     }
 }
