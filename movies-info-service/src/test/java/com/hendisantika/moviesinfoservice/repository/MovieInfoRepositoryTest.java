@@ -1,6 +1,7 @@
 package com.hendisantika.moviesinfoservice.repository;
 
 import com.hendisantika.moviesinfoservice.entity.MovieInfo;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,5 +37,11 @@ class MovieInfoRepositoryTests {
         );
         movieInfoRepository.saveAll(movieInfos)
                 .blockLast(); // to make sure data is saved before start of tests
+    }
+
+    @AfterEach
+    void tearDown() {
+        movieInfoRepository.deleteAll()
+                .block();
     }
 }
