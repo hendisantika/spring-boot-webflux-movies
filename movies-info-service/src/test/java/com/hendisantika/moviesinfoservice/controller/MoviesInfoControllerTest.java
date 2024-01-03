@@ -194,4 +194,25 @@ class MoviesInfoControllerTest {
                     assertThat(response, equalTo("movieInfo.name must be present, movieInfo.year must be a positive"));
                 });
     }
+
+    @Test
+    void addMovieInfo_validation_cast() {
+        var movieInfo = new MovieInfo(null, "Dark Knight Rises", 2012, List.of(""), LocalDate.parse("2012-07-20"));
+        when(moviesInfoServiceMock.addMovieInfo(ArgumentMatchers.isA(MovieInfo.class)))
+                .thenCallRealMethod();
+
+        client
+                .post()
+                .uri("/v1/movieinfos")
+                .bodyValue(movieInfo)
+                .exchange()
+                .expectStatus()
+                .isBadRequest()
+                .expectBody(String.class)
+                .consumeWith(stringEntityExchangeResult -> {
+                    var response = stringEntityExchangeResult.getResponseBody();
+                    assertThat(response, equalTo("movieInfo.cast must be present"));
+                });
+    }
+
 }
