@@ -84,4 +84,15 @@ class MoviesInfoControllerIT {
                 .expectBodyList(MovieInfo.class)
                 .hasSize(3);
     }
+
+    @Test
+    void getMovieInfoById() {
+        client.get()
+                .uri("/v1/movieinfos/{id}", "specific-id")
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody()
+                .jsonPath("$.name").isEqualTo("Dark Knight Rises");
+    }
 }
