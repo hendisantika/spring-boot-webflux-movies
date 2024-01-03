@@ -73,4 +73,15 @@ class MoviesInfoControllerIT {
                     assertThat(saved.getId(), is(not(nullValue())));
                 });
     }
+
+    @Test
+    void getAllMovieInfos() {
+        client.get()
+                .uri("/v1/movieinfos")
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBodyList(MovieInfo.class)
+                .hasSize(3);
+    }
 }
