@@ -92,4 +92,13 @@ class MovieInfoRepositoryTests {
                     assertThat(2021, equalTo(movieInfo.getYear()));
                 });
     }
+
+    @Test
+    void delete() {
+        movieInfoRepository.deleteById("specific-id").block();
+        var flux = movieInfoRepository.findAll().log();
+        StepVerifier.create(flux)
+                .expectNextCount(2)
+                .verifyComplete();
+    }
 }
