@@ -9,6 +9,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -215,4 +216,22 @@ class MoviesInfoControllerTest {
                 });
     }
 
+    @Test
+    void getMovieInfosByYear() {
+        var movieInfo = new MovieInfo("specific-id", "Dark Knight Rises", 2012, List.of("Christian Bale"), LocalDate.parse("2012-07-20"));
+        when(moviesInfoServiceMock.getMovieInfosByYear(2012))
+                .thenReturn(Flux.just(movieInfo));
+
+        var uri = UriComponentsBuilder.fromUriString("/v1/movieinfos")
+                .queryParam("year", 2012)
+                .buildAndExpand().toUri();
+        client
+                .get()
+                .uri(uri)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBodyList(MovieInfo.class)
+                .hasSize(1);
+    }
 }
