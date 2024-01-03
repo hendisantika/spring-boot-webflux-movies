@@ -4,6 +4,7 @@ import com.hendisantika.moviesinfoservice.entity.MovieInfo;
 import com.hendisantika.moviesinfoservice.repository.MovieInfoRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,6 +13,11 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.time.LocalDate;
 import java.util.List;
+
+import static org.assertj.core.api.AssertionsForClassTypes.not;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 
 /**
  * Created by IntelliJ IDEA.
@@ -49,5 +55,22 @@ class MoviesInfoControllerIT {
     void tearDown() {
         movieInfoRepository.deleteAll()
                 .block();
+    }
+
+    @Test
+    void addMovieInfo() {
+        var movie = new MovieInfo(null, "Movie Title", 2021, List.of("First Last"), LocalDate.parse("2021-01-11"));
+
+        client.post()
+                .uri("/v1/movieinfos")
+                .bodyValue(movie)
+                .exchange()
+                .expectStatus()
+                .isCreated()
+                .expectBody(MovieInfo.class)
+                .consumeWith(movieInfoEntityExchangeResult -> {
+                    var saved = movieInfoEntityExchangeResult.getResponseBody();
+                    assertThat(saved.getId(), is(not(nullValue())));
+                });
     }
 }
