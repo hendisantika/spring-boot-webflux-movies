@@ -3,10 +3,12 @@ package com.hendisantika.moviesinfoservice.repository;
 import com.hendisantika.moviesinfoservice.entity.MovieInfo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import reactor.test.StepVerifier;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -43,5 +45,13 @@ class MovieInfoRepositoryTests {
     void tearDown() {
         movieInfoRepository.deleteAll()
                 .block();
+    }
+
+    @Test
+    void findAll() {
+        var flux = movieInfoRepository.findAll().log();
+        StepVerifier.create(flux)
+                .expectNextCount(3)
+                .verifyComplete();
     }
 }
