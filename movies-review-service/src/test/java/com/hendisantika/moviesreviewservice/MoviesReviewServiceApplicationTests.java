@@ -120,4 +120,36 @@ class MoviesReviewServiceApplicationTests {
                 .expectBodyList(Review.class)
                 .hasSize(2);
     }
+
+    @Test
+    void getReviewsStream() {
+        var review = new Review(null, 1L, "Comment to test this stream", 7.5);
+        client
+                .post()
+                .uri("/v1/reviews")
+                .bodyValue(review)
+                .exchange()
+                .expectStatus()
+                .isCreated()
+                .expectBody(Review.class)
+                .consumeWith(reviewEntityExchangeResult -> {
+                    var response = reviewEntityExchangeResult.getResponseBody();
+                    assertThat(response, is(not(nullValue())));
+                });
+
+        var reviewStreamFlux = client
+                .get()
+                .uri("/v1/reviews/stream")
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .returnResult(Review.class)
+                .getResponseBody();
+
+        StepVerifier.create(reviewStreamFlux.log())
+                .assertNext(r -> {
+                    assertThat(r.getComment(), equalTo("Comment to test this stream"));
+                })
+                .thenCancel();
+    }
 }
