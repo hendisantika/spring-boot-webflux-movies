@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.test.StepVerifier;
 
 import java.util.List;
@@ -104,5 +105,19 @@ class MoviesReviewServiceApplicationTests {
         StepVerifier.create(flux)
                 .expectNextCount(2)
                 .verifyComplete();
+    }
+
+    @Test
+    void getReviews_byMovieInfoId() {
+        var uri = UriComponentsBuilder.fromUriString("/v1/reviews")
+                .queryParam("movieInfoId", 1L)
+                .buildAndExpand()
+                .toUri();
+        client
+                .get()
+                .uri(uri)
+                .exchange()
+                .expectBodyList(Review.class)
+                .hasSize(2);
     }
 }
