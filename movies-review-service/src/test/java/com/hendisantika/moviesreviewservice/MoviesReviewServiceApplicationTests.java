@@ -58,4 +58,16 @@ class MoviesReviewServiceApplicationTests {
                     assertThat(response, is(not(nullValue())));
                 });
     }
+
+    @Test
+    void getReviews() {
+        client
+                .get()
+                .uri("/v1/reviews")
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBodyList(Review.class)
+                .hasSize(3);
+    }
 }
