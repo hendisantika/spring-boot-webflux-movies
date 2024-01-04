@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.test.StepVerifier;
 
 import java.util.List;
 
@@ -88,5 +89,20 @@ class MoviesReviewServiceApplicationTests {
                     assertThat(response.getComment(), equalTo("Updated review"));
                     assertThat(response.getRating(), equalTo(9.9));
                 });
+    }
+
+    @Test
+    void deleteReview() {
+        client
+                .delete()
+                .uri("/v1/reviews/{id}", "specific-id")
+                .exchange()
+                .expectStatus()
+                .isNoContent();
+
+        var flux = repository.findAll();
+        StepVerifier.create(flux)
+                .expectNextCount(2)
+                .verifyComplete();
     }
 }
