@@ -1,15 +1,33 @@
 package com.hendisantika.moviesservice.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.hendisantika.moviesservice.domain.Movie;
+import com.hendisantika.moviesservice.domain.MovieInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.test.StepVerifier;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
 /**
  * Created by IntelliJ IDEA.
@@ -178,5 +196,32 @@ public class MoviesControllerTest {
                 .isEqualTo("MovieInfo Service Unavailable");
 
         WireMock.verify(4, getRequestedFor(urlEqualTo("/v1/movieinfos/123")));
+    }
+
+    @Test
+    void retrieveMovieInfoStream() throws JsonProcessingException {
+        MovieInfo movieInfo = new MovieInfo("999", "A New Hope", 2012, List.of("Actor1"), LocalDate.parse("2012-01-01"));
+        stubFor(get(urlEqualTo("/v1/movieinfos/stream"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_EVENT_STREAM_VALUE)
+                        .withBody(new ObjectMapper().registerModule(new JavaTimeModule()).writeValueAsString(movieInfo))
+                )
+        );
+
+        var streamFlux = client
+                .get()
+                .uri("/v1/movies/stream")
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .returnResult(MovieInfo.class)
+                .getResponseBody();
+
+        StepVerifier.create(streamFlux.log())
+                .assertNext(m -> {
+                    assertThat(m.getName(), equalTo("A New Hope"));
+                })
+                .thenCancel();
     }
 }
