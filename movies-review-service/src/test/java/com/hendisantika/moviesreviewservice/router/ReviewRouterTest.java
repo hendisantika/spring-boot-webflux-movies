@@ -99,4 +99,19 @@ class ReviewRouterTest {
                     assertThat(response.getComment(), equalTo("Great movie"));
                 });
     }
+
+    @Test
+    void deleteReview() {
+        var existingReview = new Review("id", 1L, "Good movie", 7.5);
+        when(repository.findById("id"))
+                .thenReturn(Mono.just(existingReview));
+        when(repository.deleteById("id"))
+                .thenReturn(Mono.empty().ofType(Void.class));
+        client
+                .delete()
+                .uri("/v1/reviews/{id}", "id")
+                .exchange()
+                .expectStatus()
+                .isNoContent();
+    }
 }
