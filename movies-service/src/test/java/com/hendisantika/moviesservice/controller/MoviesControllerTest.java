@@ -1,5 +1,6 @@
 package com.hendisantika.moviesservice.controller;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,9 +25,14 @@ import org.springframework.test.web.reactive.server.WebTestClient;
                 "restClient.moviesInfoUrl=http://localhost:8084/v1/movieinfos",
                 "restClient.reviewsUrl=http://localhost:8084/v1/reviews"
         })
-public class MoviesControllerIT {
+public class MoviesControllerTest {
 
     @Autowired
     private WebTestClient client;
+
+    @BeforeEach
+    void setup() {
+        WireMock.reset();
+    }
 
 }
