@@ -11,6 +11,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -58,6 +59,20 @@ class ReviewRouterTest {
                     var response = reviewEntityExchangeResult.getResponseBody();
                     assertThat(response, is(not(nullValue())));
                 });
+    }
+
+    @Test
+    void getReviews() {
+        when(repository.findAll())
+                .thenReturn(Flux.just(new Review("id", 1L, "Good movie", 7.5)));
+        client
+                .get()
+                .uri("/v1/reviews")
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBodyList(Review.class)
+                .hasSize(1);
     }
 
 }
