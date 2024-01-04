@@ -114,4 +114,22 @@ class ReviewRouterTest {
                 .expectStatus()
                 .isNoContent();
     }
+
+    @Test
+    void getReviews_byMovieInfoId() {
+        var existingReview = new Review("id", 1L, "Good movie", 7.5);
+        when(repository.findByMovieInfoId(1L))
+                .thenReturn(Flux.just(existingReview));
+        client
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/v1/reviews")
+                        .queryParam("movieInfoId", 1L)
+                        .build())
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBodyList(Review.class)
+                .hasSize(1);
+    }
 }
