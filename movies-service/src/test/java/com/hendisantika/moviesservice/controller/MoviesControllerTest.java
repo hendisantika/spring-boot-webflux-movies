@@ -159,4 +159,24 @@ public class MoviesControllerTest {
 
         WireMock.verify(4, getRequestedFor(urlEqualTo("/v1/reviews?movieInfoId=123")));
     }
+
+    @Test
+    void retrieveMovieById_reviews_retry() {
+        stubFor(get(urlEqualTo("/v1/movieinfos/123"))
+                .willReturn(aResponse()
+                        .withStatus(500)
+                        .withBody("MovieInfo Service Unavailable")));
+
+
+        client
+                .get()
+                .uri("/v1/movies/{id}", "123")
+                .exchange()
+                .expectStatus()
+                .is5xxServerError()
+                .expectBody(String.class)
+                .isEqualTo("MovieInfo Service Unavailable");
+
+        WireMock.verify(4, getRequestedFor(urlEqualTo("/v1/movieinfos/123")));
+    }
 }
