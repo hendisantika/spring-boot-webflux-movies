@@ -3,10 +3,12 @@ spring:
     name: movies-info-service
   data:
     mongodb:
-      host: localhost
+      host: mongodb
       port: 27017
       database: movie
 
 #logging:
 #  level:
+server:
+  port: 8081
 #    root: debug
