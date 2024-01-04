@@ -2,6 +2,7 @@ package com.hendisantika.moviesreviewservice;
 
 import com.hendisantika.moviesreviewservice.domain.Review;
 import com.hendisantika.moviesreviewservice.repository.ReviewReactiveRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
@@ -28,5 +29,10 @@ class MoviesReviewServiceApplicationTests {
                 new Review("specific-id", 2L, "Best movie", 9.0)
         );
         repository.saveAll(reviews).blockLast();
+    }
+
+    @AfterEach
+    void tearDown() {
+        repository.deleteAll().block();
     }
 }
