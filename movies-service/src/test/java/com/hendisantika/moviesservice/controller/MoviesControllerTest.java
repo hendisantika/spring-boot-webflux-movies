@@ -134,4 +134,29 @@ public class MoviesControllerTest {
                 .expectBody(String.class)
                 .isEqualTo("MovieInfo Service Unavailable");
     }
+
+    @Test
+    void retrieveMovieById_reviews_500() {
+        stubFor(get(urlEqualTo("/v1/movieinfos/123"))
+                .willReturn(aResponse()
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBodyFile("movieInfo.json")));
+
+        stubFor(get(urlEqualTo("/v1/reviews?movieInfoId=123"))
+                .willReturn(aResponse()
+                        .withStatus(500)
+                        .withBody("Reviews Service Unavailable")));
+
+
+        client
+                .get()
+                .uri("/v1/movies/{id}", "123")
+                .exchange()
+                .expectStatus()
+                .is5xxServerError()
+                .expectBody(String.class)
+                .isEqualTo("Reviews Service Unavailable");
+
+        WireMock.verify(4, getRequestedFor(urlEqualTo("/v1/reviews?movieInfoId=123")));
+    }
 }
