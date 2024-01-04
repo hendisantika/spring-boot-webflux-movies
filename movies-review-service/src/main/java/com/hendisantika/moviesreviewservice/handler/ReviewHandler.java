@@ -2,6 +2,7 @@ package com.hendisantika.moviesreviewservice.handler;
 
 import com.hendisantika.moviesreviewservice.domain.Review;
 import com.hendisantika.moviesreviewservice.exception.ReviewDataException;
+import com.hendisantika.moviesreviewservice.repository.ReviewReactiveRepository;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
@@ -30,14 +31,14 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ReviewHandler {
 
-    private final ReviewReactiveRepository repository;
+    private final ReviewReactiveRepository reviewReactiveRepository;
     private final Validator validator;
     private final Sinks.Many<Review> reviewSink = Sinks.many().replay().latest();
 
     public Mono<ServerResponse> addReview(ServerRequest request) {
         return request.bodyToMono(Review.class)
                 .doOnNext(this::validate)
-                .flatMap(repository::save)
+                .flatMap(reviewReactiveRepository::save)
                 .doOnNext(review -> {
                     reviewSink.tryEmitNext(review);
                 })
@@ -60,17 +61,17 @@ public class ReviewHandler {
         if (movieInfoId.isPresent()) {
             return ServerResponse
                     .ok()
-                    .body(repository.findByMovieInfoId(Long.valueOf(movieInfoId.get())), Review.class);
+                    .body(reviewReactiveRepository.findByMovieInfoId(Long.valueOf(movieInfoId.get())), Review.class);
         } else {
             return ServerResponse
                     .ok()
-                    .body(repository.findAll(), Review.class);
+                    .body(reviewReactiveRepository.findAll(), Review.class);
         }
     }
 
     public Mono<ServerResponse> updateReview(ServerRequest request) {
         String id = request.pathVariable("id");
-        var existingReview = repository.findById(id);
+        var existingReview = reviewReactiveRepository.findById(id);
         /* option 1 for handling 404 */
         // .switchIfEmpty(Mono.error(new ReviewNotFoundException("Review not found for " + id)));
 
@@ -81,7 +82,7 @@ public class ReviewHandler {
                             review.setRating(req.getRating());
                             return review;
                         })
-                        .flatMap(repository::save)
+                        .flatMap(reviewReactiveRepository::save)
                         .flatMap(ServerResponse.ok()::bodyValue))
                 /* option 2 for handling 404 */
                 .switchIfEmpty(ServerResponse.notFound().build());
@@ -89,9 +90,9 @@ public class ReviewHandler {
 
     public Mono<ServerResponse> deleteReview(ServerRequest request) {
         String id = request.pathVariable("id");
-        var existingReview = repository.findById(id);
+        var existingReview = reviewReactiveRepository.findById(id);
         return existingReview
-                .flatMap(review -> repository.deleteById(id))
+                .flatMap(review -> reviewReactiveRepository.deleteById(id))
                 .then(ServerResponse.noContent().build());
     }
 
