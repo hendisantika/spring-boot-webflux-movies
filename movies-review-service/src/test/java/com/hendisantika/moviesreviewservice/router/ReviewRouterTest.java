@@ -132,4 +132,18 @@ class ReviewRouterTest {
                 .expectBodyList(Review.class)
                 .hasSize(1);
     }
+
+    @Test
+    void addReview_validation() {
+        var review = new Review(null, null, "Good movie", -1.0);
+        client
+                .post()
+                .uri("/v1/reviews")
+                .bodyValue(review)
+                .exchange()
+                .expectStatus()
+                .isBadRequest()
+                .expectBody(String.class)
+                .isEqualTo("review.movieInfoId must not be null, review.rating must be positive");
+    }
 }
