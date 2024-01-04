@@ -15,6 +15,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
@@ -75,4 +76,27 @@ class ReviewRouterTest {
                 .hasSize(1);
     }
 
+    @Test
+    void updateReview() {
+        var requestBody = new Review(null, null, "Great movie", 9.5);
+        var existingReview = new Review("id", 1L, "Good movie", 7.5);
+        var updatedReview = new Review("id", 1L, "Great movie", 9.5);
+        when(repository.findById("id"))
+                .thenReturn(Mono.just(existingReview));
+        when(repository.save(updatedReview))
+                .thenReturn(Mono.just(updatedReview));
+        client
+                .put()
+                .uri("/v1/reviews/{id}", "id")
+                .bodyValue(requestBody)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(Review.class)
+                .consumeWith(reviewEntityExchangeResult -> {
+                    var response = reviewEntityExchangeResult.getResponseBody();
+                    assertThat(response.getRating(), equalTo(9.5));
+                    assertThat(response.getComment(), equalTo("Great movie"));
+                });
+    }
 }
