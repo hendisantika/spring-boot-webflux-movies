@@ -54,4 +54,17 @@ public class ReviewHandler {
         }
     }
 
+    public Mono<ServerResponse> getReviews(ServerRequest request) {
+        var movieInfoId = request.queryParam("movieInfoId");
+        if (movieInfoId.isPresent()) {
+            return ServerResponse
+                    .ok()
+                    .body(repository.findByMovieInfoId(Long.valueOf(movieInfoId.get())), Review.class);
+        } else {
+            return ServerResponse
+                    .ok()
+                    .body(repository.findAll(), Review.class);
+        }
+    }
+
 }
