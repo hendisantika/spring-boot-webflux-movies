@@ -67,4 +67,22 @@ public class ReviewHandler {
         }
     }
 
+    public Mono<ServerResponse> updateReview(ServerRequest request) {
+        String id = request.pathVariable("id");
+        var existingReview = repository.findById(id);
+        /* option 1 for handling 404 */
+        // .switchIfEmpty(Mono.error(new ReviewNotFoundException("Review not found for " + id)));
+
+        return existingReview
+                .flatMap(review -> request.bodyToMono(Review.class)
+                        .map(req -> {
+                            review.setComment(req.getComment());
+                            review.setRating(req.getRating());
+                            return review;
+                        })
+                        .flatMap(repository::save)
+                        .flatMap(ServerResponse.ok()::bodyValue))
+                /* option 2 for handling 404 */
+                .switchIfEmpty(ServerResponse.notFound().build());
+    }
 }
