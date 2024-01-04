@@ -65,4 +65,29 @@ public class MoviesControllerTest {
                     assertThat(movie.getReviews().size(), equalTo(2));
                 });
     }
+
+    @Test
+    void retrieveMovieById_movieInfo_404() {
+        stubFor(get(urlEqualTo("/v1/movieinfos/123"))
+                .willReturn(aResponse()
+                        .withStatus(404)
+                ));
+
+        stubFor(get(urlEqualTo("/v1/reviews?movieInfoId=123"))
+                .willReturn(aResponse()
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBodyFile("reviews.json")));
+
+
+        client
+                .get()
+                .uri("/v1/movies/{id}", "123")
+                .exchange()
+                .expectStatus()
+                .is4xxClientError()
+                .expectBody(String.class)
+                .isEqualTo("No movie info for id 123");
+
+        WireMock.verify(1, getRequestedFor(urlEqualTo("/v1/movieinfos/123")));
+    }
 }
