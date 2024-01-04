@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -51,5 +52,14 @@ public class MoviesInfoRestClient {
                 .bodyToMono(MovieInfo.class)
                 .retryWhen(RetryUtil.retrySpec(MoviesInfoServerException.class))
                 .log();
+    }
+
+    public Flux<MovieInfo> retrieveMovieInfoStream() {
+        var uri = moviesInfoUrl.concat("/stream");
+        return client
+                .get()
+                .uri(uri)
+                .retrieve()
+                .bodyToFlux(MovieInfo.class);
     }
 }
