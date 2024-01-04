@@ -3,11 +3,14 @@ package com.hendisantika.moviesservice.controller;
 import com.hendisantika.moviesservice.client.MoviesInfoRestClient;
 import com.hendisantika.moviesservice.client.ReviewRestClient;
 import com.hendisantika.moviesservice.domain.Movie;
+import com.hendisantika.moviesservice.domain.MovieInfo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -36,5 +39,10 @@ public class MoviesController {
                             .collectList();
                     return reviewsMono.map(reviews -> new Movie(movieInfo, reviews));
                 });
+    }
+
+    @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<MovieInfo> retrieveMovieInfos() {
+        return moviesInfoRestClient.retrieveMovieInfoStream();
     }
 }
