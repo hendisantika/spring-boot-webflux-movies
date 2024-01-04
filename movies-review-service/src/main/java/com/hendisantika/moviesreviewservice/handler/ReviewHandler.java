@@ -85,4 +85,12 @@ public class ReviewHandler {
                 /* option 2 for handling 404 */
                 .switchIfEmpty(ServerResponse.notFound().build());
     }
+
+    public Mono<ServerResponse> deleteReview(ServerRequest request) {
+        String id = request.pathVariable("id");
+        var existingReview = repository.findById(id);
+        return existingReview
+                .flatMap(review -> repository.deleteById(id))
+                .then(ServerResponse.noContent().build());
+    }
 }
