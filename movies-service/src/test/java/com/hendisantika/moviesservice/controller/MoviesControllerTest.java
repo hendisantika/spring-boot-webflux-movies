@@ -90,4 +90,30 @@ public class MoviesControllerTest {
 
         WireMock.verify(1, getRequestedFor(urlEqualTo("/v1/movieinfos/123")));
     }
+
+    @Test
+    void retrieveMovieById_reviews_404() {
+        stubFor(get(urlEqualTo("/v1/movieinfos/123"))
+                .willReturn(aResponse()
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBodyFile("movieInfo.json")));
+
+        stubFor(get(urlEqualTo("/v1/reviews?movieInfoId=123"))
+                .willReturn(aResponse()
+                        .withStatus(404)));
+
+
+        client
+                .get()
+                .uri("/v1/movies/{id}", "123")
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(Movie.class)
+                .consumeWith(movieEntityExchangeResult -> {
+                    var movie = movieEntityExchangeResult.getResponseBody();
+                    assertThat(movie.getMovieInfo().getName(), equalTo("Batman Begins"));
+                    assertThat(movie.getReviews().size(), equalTo(0));
+                });
+    }
 }
