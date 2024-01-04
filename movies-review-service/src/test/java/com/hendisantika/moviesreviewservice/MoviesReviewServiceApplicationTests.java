@@ -13,6 +13,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
@@ -69,5 +70,23 @@ class MoviesReviewServiceApplicationTests {
                 .isOk()
                 .expectBodyList(Review.class)
                 .hasSize(3);
+    }
+
+    @Test
+    void updateReview() {
+        var review = new Review(null, null, "Updated review", 9.9);
+        client
+                .put()
+                .uri("/v1/reviews/{id}", "specific-id")
+                .bodyValue(review)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(Review.class)
+                .consumeWith(reviewEntityExchangeResult -> {
+                    var response = reviewEntityExchangeResult.getResponseBody();
+                    assertThat(response.getComment(), equalTo("Updated review"));
+                    assertThat(response.getRating(), equalTo(9.9));
+                });
     }
 }
