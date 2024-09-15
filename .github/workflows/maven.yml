@@ -27,14 +27,19 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
         cache: maven
-        
-    - name: Build with Maven
+
+    - name: Setup Testcontainers Cloud Client
+      uses: atomicjar/testcontainers-cloud-setup-action@v1
+      with:
+        token: ${{ secrets.TC_CLOUD_TOKEN }}
+
+    - name: Build with Maven for movies-info-service
       run: mvn -B package --file ./movies-info-service/pom.xml
 
-    - name: Build with Maven
+    - name: Build with Maven for movies-review-service
       run: mvn -B package --file ./movies-review-service/pom.xml
 
-    - name: Build with Maven
+    - name: Build with Maven for movies-service
       run: mvn -B package --file ./movies-service/pom.xml
 
     # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
