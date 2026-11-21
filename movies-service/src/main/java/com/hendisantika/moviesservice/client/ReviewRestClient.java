@@ -7,6 +7,7 @@ import com.hendisantika.moviesservice.util.RetryUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -33,7 +34,7 @@ public class ReviewRestClient {
     private String reviewUrl;
 
     public Flux<Review> retrieveReviews(String movieId) {
-        var uri = UriComponentsBuilder.fromHttpUrl(reviewUrl)
+        var uri = UriComponentsBuilder.fromUriString(reviewUrl)
                 .queryParam("movieInfoId", movieId)
                 .buildAndExpand()
                 .toUriString();
@@ -42,14 +43,14 @@ public class ReviewRestClient {
                 .get()
                 .uri(uri)
                 .retrieve()
-                .onStatus(HttpStatus::is4xxClientError, clientResponse -> {
+                .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> {
                     if (clientResponse.statusCode().equals(HttpStatus.NOT_FOUND)) {
                         return Mono.empty();
                     }
                     return clientResponse.bodyToMono(String.class)
                             .flatMap(message -> Mono.error(new ReviewsClientException(message)));
                 })
-                .onStatus(HttpStatus::is5xxServerError, clientResponse -> {
+                .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> {
                     return clientResponse.bodyToMono(String.class)
                             .flatMap(message -> Mono.error(new ReviewsServerException(message)));
                 })

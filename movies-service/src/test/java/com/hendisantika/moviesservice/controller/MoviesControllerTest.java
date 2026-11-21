@@ -1,17 +1,16 @@
 package com.hendisantika.moviesservice.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.databind.json.JsonMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import com.hendisantika.moviesservice.domain.Movie;
 import com.hendisantika.moviesservice.domain.MovieInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
+import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
@@ -26,6 +25,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
@@ -41,13 +41,18 @@ import static org.hamcrest.Matchers.equalTo;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWebTestClient
-@AutoConfigureWireMock(port = 8084)
 @TestPropertySource(
         properties = {
                 "restClient.moviesInfoUrl=http://localhost:8084/v1/movieinfos",
                 "restClient.reviewsUrl=http://localhost:8084/v1/reviews"
         })
 public class MoviesControllerTest {
+
+    @RegisterExtension
+    static WireMockExtension wireMock = WireMockExtension.newInstance()
+            .options(wireMockConfig().port(8084))
+            .configureStaticDsl(true)
+            .build();
 
     @Autowired
     private WebTestClient client;
@@ -199,13 +204,13 @@ public class MoviesControllerTest {
     }
 
     @Test
-    void retrieveMovieInfoStream() throws JsonProcessingException {
+    void retrieveMovieInfoStream() {
         MovieInfo movieInfo = new MovieInfo("999", "A New Hope", 2012, List.of("Actor1"), LocalDate.parse("2012-01-01"));
         stubFor(get(urlEqualTo("/v1/movieinfos/stream"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_EVENT_STREAM_VALUE)
-                        .withBody(new ObjectMapper().registerModule(new JavaTimeModule()).writeValueAsString(movieInfo))
+                        .withBody(JsonMapper.builder().build().writeValueAsString(movieInfo))
                 )
         );
 

@@ -6,10 +6,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
+import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.web.util.UriComponentsBuilder;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.mongodb.MongoDBContainer;
+import org.testcontainers.utility.DockerImageName;
 import reactor.test.StepVerifier;
 
 import java.util.List;
@@ -22,7 +26,12 @@ import static org.hamcrest.Matchers.nullValue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWebTestClient
+@Testcontainers
 class MoviesReviewServiceApplicationTests {
+
+    @Container
+    @ServiceConnection
+    static MongoDBContainer mongoDBContainer = new MongoDBContainer(DockerImageName.parse("mongo:7.0"));
 
     @Autowired
     private WebTestClient client;
@@ -109,13 +118,11 @@ class MoviesReviewServiceApplicationTests {
 
     @Test
     void getReviews_byMovieInfoId() {
-        var uri = UriComponentsBuilder.fromUriString("/v1/reviews")
-                .queryParam("movieInfoId", 1L)
-                .buildAndExpand()
-                .toUri();
         client
                 .get()
-                .uri(uri)
+                .uri(uriBuilder -> uriBuilder.path("/v1/reviews")
+                        .queryParam("movieInfoId", 1L)
+                        .build())
                 .exchange()
                 .expectBodyList(Review.class)
                 .hasSize(2);
